@@ -1,7 +1,6 @@
 import Notiflix from 'notiflix';
 
 // constants API
-const API_KEY = 'YOUR_API_KEY';
 const BASE_URL = 'https://pixabay.com/api/';
 const PER_PAGE = 40;
 
@@ -41,6 +40,7 @@ loadMoreBtn.addEventListener('click', () => {
 
 // a function to make a request to the Pixabay API
 function searchImages(query, page) {
+  const API_KEY = `${BASE_URL}?key=36713183-ab33de53433f0fab0c63f220d&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${PER_PAGE}`;
   const url = `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${PER_PAGE}`;
 
   // Execution of an HTTP request
