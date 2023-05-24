@@ -45,7 +45,12 @@ function searchImages(query, page) {
 
   // Execution of an HTTP request
   fetch(url)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.hits.length === 0) {
         Notiflix.Notify.info(
