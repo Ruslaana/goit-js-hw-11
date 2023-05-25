@@ -13,7 +13,7 @@ let currentPage = 1;
 let currentQuery = '';
 
 // search form submission handler
-searchForm.addEventListener('submit', e => {
+searchForm.addEventListener('submit', async e => {
   e.preventDefault();
   const searchQuery = e.target.elements.searchQuery.value.trim();
 
@@ -28,43 +28,57 @@ searchForm.addEventListener('submit', e => {
   currentPage = 1;
   currentQuery = searchQuery;
 
-  // Execution of a request to Pixabay API
-  searchImages(searchQuery, currentPage);
+  try {
+    // Execution of a request to Pixabay API
+    const data = await searchImages(searchQuery, currentPage);
+
+    if (data.hits.length === 0) {
+      Notiflix.Notify.info(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else {
+      renderImages(data.hits);
+      checkPagination(data.totalHits);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    Notiflix.Notify.failure('An error occurred. Please try again later.');
+  }
 });
 
 // handler for clicking the "Download More" button
-loadMoreBtn.addEventListener('click', () => {
+loadMoreBtn.addEventListener('click', async () => {
   currentPage++;
-  searchImages(currentQuery, currentPage);
+
+  try {
+    // Execution of a request to Pixabay API
+    const data = await searchImages(currentQuery, currentPage);
+
+    if (data.hits.length > 0) {
+      renderImages(data.hits);
+    }
+
+    checkPagination(data.totalHits);
+  } catch (error) {
+    console.error('Error:', error);
+    Notiflix.Notify.failure('An error occurred. Please try again later.');
+  }
 });
 
 // a function to make a request to the Pixabay API
-function searchImages(query, page) {
-  const API_KEY = `${BASE_URL}?key=36713183-ab33de53433f0fab0c63f220d&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${PER_PAGE}`;
+async function searchImages(query, page) {
+  const API_KEY = '36713183-ab33de53433f0fab0c63f220d';
   const url = `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${PER_PAGE}`;
 
   // Execution of an HTTP request
-  fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.hits.length === 0) {
-        Notiflix.Notify.info(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      } else {
-        renderImages(data.hits);
-        checkPagination(data.totalHits);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      Notiflix.Notify.failure('An error occurred. Please try again later.');
-    });
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const data = await response.json();
+  return data;
 }
 
 // function for rendering image cards
